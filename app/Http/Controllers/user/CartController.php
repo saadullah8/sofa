@@ -4,13 +4,21 @@ namespace App\Http\Controllers\user;
 
 use App\Helpers\Cart;
 use App\Http\Controllers\Controller;
+use App\Models\Product;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 class CartController extends Controller
 {
     public function add($product_id, $qty)
     {
+        $product = Product::findOrFail($product_id);
+        $qty = max(1, (int) $qty);
+
+        if ($qty > $product->stock) {
+            return response()->json([
+                'message' => 'Only ' . $product->stock . ' item(s) available in stock.',
+            ], 422);
+        }
 
         $response =  Cart::add($product_id, $qty);
         return response()->json(
@@ -25,6 +33,22 @@ class CartController extends Controller
 
     public function increase($id)
     {
+        $product = Product::findOrFail($id);
+        $currentQty = 0;
+
+        foreach (Cart::products() as $item) {
+            if ($item->id == $id) {
+                $currentQty = $item->qty;
+                break;
+            }
+        }
+
+        if ($currentQty >= $product->stock) {
+            return response()->json([
+                'message' => 'No more stock available for this product.',
+            ], 422);
+        }
+
         Cart::increase($id);
         return response()->json([
             'subtotal' => Cart::subTotal(),

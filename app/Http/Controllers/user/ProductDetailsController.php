@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 class ProductDetailsController extends Controller
 {
     public function index($id){
-        $product = Product::with('images')->find($id);
+        $product = Product::with(['images', 'subcategory', 'reviews'])->find($id);
         if (!$product) {
             return redirect()->route('home')->with('error', 'Product not found');
         }

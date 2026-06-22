@@ -14,6 +14,11 @@
             @if (session('error'))
                 <div class="alert alert-danger">{{ session('error') }}</div>
             @endif
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    Please complete the checkout details before payment.
+                </div>
+            @endif
             <div class="table-responsive cart_info">
                 <table class="table table-condensed">
                     <thead>
@@ -77,16 +82,29 @@
                             <li>Total <span>$ <span id="cart_grandtotal">
                                         {{ App\Helpers\Cart::grandTotal() }}</span></span></li>
                         </ul>
-                        @if (App\Helpers\Cart::exists())
-                            <form action="{{ route('checkout') }}" method="POST">
-                                @csrf
-                                <button class="btn btn-default check_out" type="submit">Check Out</button>
-                            </form>
-                        @else
+                        @if (!App\Helpers\Cart::exists())
                             <a class="btn btn-default check_out" href="{{ route('shop.index') }}">Continue Shopping</a>
                         @endif
                     </div>
                 </div>
+                @if (App\Helpers\Cart::exists())
+                    <div class="col-sm-6">
+                        <div class="total_area">
+                            <h4>Checkout Details</h4>
+                            <form action="{{ route('checkout') }}" method="POST">
+                                @csrf
+                                <input class="form-control" type="text" name="customer_name" value="{{ old('customer_name', Auth::user()->name ?? '') }}" placeholder="Full name" required>
+                                <input class="form-control" type="email" name="customer_email" value="{{ old('customer_email', Auth::user()->email ?? '') }}" placeholder="Email address" required style="margin-top: 10px;">
+                                <input class="form-control" type="text" name="customer_phone" value="{{ old('customer_phone') }}" placeholder="Phone number" required style="margin-top: 10px;">
+                                <input class="form-control" type="text" name="shipping_address" value="{{ old('shipping_address') }}" placeholder="Shipping address" required style="margin-top: 10px;">
+                                <input class="form-control" type="text" name="shipping_city" value="{{ old('shipping_city') }}" placeholder="City" required style="margin-top: 10px;">
+                                <input class="form-control" type="text" name="shipping_postal_code" value="{{ old('shipping_postal_code') }}" placeholder="Postal code" style="margin-top: 10px;">
+                                <textarea class="form-control" name="notes" placeholder="Order notes" style="margin-top: 10px;">{{ old('notes') }}</textarea>
+                                <button class="btn btn-default check_out" type="submit" style="margin-top: 10px;">Pay With Stripe</button>
+                            </form>
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
     </section>
@@ -117,8 +135,13 @@
                         $('#cart_grandtotal').html(response.grandtotal);
                         $('#cart_subtotal').html(response.subtotal);
                     },
-                    error: function(error) {
-                        console.log(error);
+                    error: function(xhr) {
+                        row.find('.cart_quantity_input').val(old_qty);
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Stock limit',
+                            text: xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Unable to increase quantity.'
+                        });
                     }
                 });
             });

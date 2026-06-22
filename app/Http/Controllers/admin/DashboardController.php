@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Review;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -19,6 +20,28 @@ class DashboardController extends Controller
     public function index()
     {
         $lowStockLimit = 5;
+        $monthlyLabels = [];
+        $monthlyRevenueData = [];
+        $monthlyOrderData = [];
+
+        for ($i = 5; $i >= 0; $i--) {
+            $month = Carbon::now()->subMonths($i);
+            $monthlyLabels[] = $month->format('M');
+            $monthlyRevenueData[] = (float) Order::where('payment_status', 'paid')
+                ->whereYear('created_at', $month->year)
+                ->whereMonth('created_at', $month->month)
+                ->sum('total_amount');
+            $monthlyOrderData[] = Order::whereYear('created_at', $month->year)
+                ->whereMonth('created_at', $month->month)
+                ->count();
+        }
+
+        $orderStatusLabels = ['Paid', 'Pending', 'Failed'];
+        $orderStatusData = [
+            Order::where('payment_status', 'paid')->count(),
+            Order::whereIn('payment_status', ['unpaid', 'pending'])->count(),
+            Order::where('payment_status', 'failed')->count(),
+        ];
 
         $data=[
             'heading'=>'Dashboard',
@@ -46,6 +69,11 @@ class DashboardController extends Controller
                 ->orderByDesc('sold_qty')
                 ->take(5)
                 ->get(),
+            'monthlyLabels' => $monthlyLabels,
+            'monthlyRevenueData' => $monthlyRevenueData,
+            'monthlyOrderData' => $monthlyOrderData,
+            'orderStatusLabels' => $orderStatusLabels,
+            'orderStatusData' => $orderStatusData,
         ];
     return view('admin.dashboard.dashboard',$data);
     }

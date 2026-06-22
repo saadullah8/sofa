@@ -17,10 +17,26 @@ class StripePaymentController extends Controller
 {
     public function checkout(Request $request)
     {
+        $validated = $request->validate([
+            'customer_name' => ['required', 'string', 'max:255'],
+            'customer_email' => ['required', 'email', 'max:255'],
+            'customer_phone' => ['required', 'string', 'max:30'],
+            'shipping_address' => ['required', 'string', 'max:255'],
+            'shipping_city' => ['required', 'string', 'max:120'],
+            'shipping_postal_code' => ['nullable', 'string', 'max:30'],
+            'notes' => ['nullable', 'string', 'max:1000'],
+        ]);
+
         if (! Cart::exists()) {
             return redirect()
                 ->route('user.cart')
                 ->with('error', 'Your cart is empty.');
+        }
+
+        if (! $this->cartStockIsAvailable()) {
+            return redirect()
+                ->route('user.cart')
+                ->with('error', 'Some cart items are no longer available in the requested quantity.');
         }
 
         if (! config('services.stripe.secret')) {
@@ -30,12 +46,13 @@ class StripePaymentController extends Controller
         }
 
         Stripe::setApiKey(config('services.stripe.secret'));
-        $order = $this->createPendingOrder();
+        $order = $this->createPendingOrder($validated);
 
         try {
             $session = Session::create([
                 'payment_method_types' => ['card'],
                 'mode' => 'payment',
+                'customer_email' => $order->customer_email,
                 'line_items' => $this->lineItems(),
                 'metadata' => [
                     'order_id' => $order->id,
@@ -150,13 +167,18 @@ class StripePaymentController extends Controller
             ->all();
     }
 
-    private function createPendingOrder(): Order
+    private function createPendingOrder(array $customerDetails): Order
     {
         $user = Auth::user();
         $order = Order::create([
             'user_id' => $user?->id,
-            'customer_name' => $user?->name,
-            'customer_email' => $user?->email,
+            'customer_name' => $customerDetails['customer_name'],
+            'customer_email' => $customerDetails['customer_email'],
+            'customer_phone' => $customerDetails['customer_phone'],
+            'shipping_address' => $customerDetails['shipping_address'],
+            'shipping_city' => $customerDetails['shipping_city'],
+            'shipping_postal_code' => $customerDetails['shipping_postal_code'] ?? null,
+            'notes' => $customerDetails['notes'] ?? null,
             'subtotal' => Cart::subTotal(),
             'shipping' => Cart::shipping(),
             'discount' => Cart::discount(),
@@ -190,6 +212,7 @@ class StripePaymentController extends Controller
             return;
         }
 
+        $wasPaid = $order->payment_status === 'paid';
         $customerDetails = $session->customer_details ?? null;
         $customerEmail = $customerDetails->email ?? $order->customer_email;
         $customerName = $customerDetails->name ?? $order->customer_name;
@@ -204,6 +227,10 @@ class StripePaymentController extends Controller
             'paid_at' => $order->paid_at ?? now(),
         ]);
 
+        if (! $wasPaid) {
+            $this->decreaseProductStock($order->fresh('items.product'));
+        }
+
         if ($customerEmail && ! $order->mail_sent_at) {
             try {
                 Mail::to($customerEmail)->send(new OrderConfirmationMail($order->fresh('items')));
@@ -216,6 +243,26 @@ class StripePaymentController extends Controller
                     'order_id' => $order->id,
                     'message' => $e->getMessage(),
                 ]);
+            }
+        }
+    }
+
+    private function cartStockIsAvailable(): bool
+    {
+        foreach (Cart::products() as $item) {
+            if ($item->stock < $item->qty) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private function decreaseProductStock(Order $order): void
+    {
+        foreach ($order->items as $item) {
+            if ($item->product) {
+                $item->product->decrement('stock', min($item->quantity, $item->product->stock));
             }
         }
     }

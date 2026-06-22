@@ -7,6 +7,11 @@
         <div class="card-body">
             <p><strong>Customer:</strong> {{ $order->customer_name ?? 'Guest' }}</p>
             <p><strong>Email:</strong> {{ $order->customer_email ?? '-' }}</p>
+            <p><strong>Phone:</strong> {{ $order->customer_phone ?? '-' }}</p>
+            <p><strong>Shipping Address:</strong> {{ $order->shipping_address ?? '-' }}</p>
+            <p><strong>City:</strong> {{ $order->shipping_city ?? '-' }}</p>
+            <p><strong>Postal Code:</strong> {{ $order->shipping_postal_code ?? '-' }}</p>
+            <p><strong>Notes:</strong> {{ $order->notes ?? '-' }}</p>
             <p><strong>Status:</strong> {{ ucfirst($order->status) }}</p>
             <p><strong>Payment:</strong> {{ ucfirst($order->payment_status) }}</p>
             <p><strong>Stripe Session:</strong> {{ $order->stripe_session_id ?? '-' }}</p>

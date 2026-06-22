@@ -11,16 +11,34 @@ class ShopController extends Controller
 {
     public function index(Request $request){
         $selectedSubcategory = $request->query('subcategory');
-        $products = Product::latest()
+        $query = Product::query()
             ->when($selectedSubcategory, function ($query) use ($selectedSubcategory) {
                 $query->where('subcategory_id', $selectedSubcategory);
             })
-            ->get();
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $query->where('name', 'like', '%' . $request->search . '%');
+            })
+            ->when($request->filled('min_price'), function ($query) use ($request) {
+                $query->where('price', '>=', (int) $request->min_price);
+            })
+            ->when($request->filled('max_price'), function ($query) use ($request) {
+                $query->where('price', '<=', (int) $request->max_price);
+            });
+
+        match ($request->query('sort')) {
+            'price_low' => $query->orderBy('price'),
+            'price_high' => $query->orderByDesc('price'),
+            'name' => $query->orderBy('name'),
+            default => $query->latest(),
+        };
+
+        $products = $query->paginate(9)->withQueryString();
 
         $data = [
             'products' => $products,
             'categories' => Category::with('subCategories')->get(),
             'selectedSubcategory' => $selectedSubcategory,
+            'maxProductPrice' => Product::max('price') ?: 1000,
         ];
 
         return view('user.shop', $data);

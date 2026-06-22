@@ -52,9 +52,9 @@
                                     <button type="button" class="btn btn-default get">Get it now</button>
                                 </div>
                                 <div class="col-sm-6">
-                                    <img src="{{ asset('assets/user/images/images/home/girl3.jpg') }}"
+                                    <img src="{{ asset('assets/user/images/home/girl3.jpg') }}"
                                         class="girl img-responsive" alt="" />
-                                    <img src="{{ asset('assets/user/images/images/home/pricing.png') }}" class="pricing"
+                                    <img src="{{ asset('assets/user/images/home/pricing.png') }}" class="pricing"
                                         alt="" />
                                 </div>
                             </div>
@@ -135,25 +135,24 @@
                                     <div class="single-products">
                                         <div class="productinfo text-center">
                                             <img src="{{ asset($product->image) }}" alt="" />
-                                            <h2>{{ $product->price }}</h2>
+                                            <h2>${{ $product->price }}</h2>
                                             <p>{{ $product->name }}</p>
-                                            <a href="#" class="btn btn-default add-to-cart"><i
-                                                    class="fa fa-shopping-cart"></i>Add to cart</a>
+                                            <button type="button" class="btn btn-default add-to-cart js-add-to-cart" data-product-id="{{ $product->id }}"><i
+                                                    class="fa fa-shopping-cart"></i>Add to cart</button>
                                         </div>
                                         <div class="product-overlay">
                                             <div class="overlay-content">
-                                                <h2>{{ $product->price }}</h2>
+                                                <h2>${{ $product->price }}</h2>
                                                 <p>{{ $product->name }}</p>
                                                 <a href="{{route('productdetails',$product->id)}}" class="btn btn-default add-to-cart"><i
-                                                        class="fa fa-shopping-cart"></i>Add to cart</a>
+                                                        class="fa fa-eye"></i>View details</a>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="choose">
                                         <ul class="nav nav-pills nav-justified">
-                                            <li><a href="#"><i class="fa fa-plus-square"></i>Add to wishlist</a>
-                                            </li>
-                                            <li><a href="#"><i class="fa fa-plus-square"></i>Add to compare</a></li>
+                                            <li><a href="{{route('productdetails',$product->id)}}"><i class="fa fa-plus-square"></i>Details</a></li>
+                                            <li><a href="#" class="js-add-to-cart" data-product-id="{{ $product->id }}"><i class="fa fa-shopping-cart"></i>Add</a></li>
                                         </ul>
                                     </div>
                                 </div>
@@ -184,8 +183,8 @@
                             </ul>
                         </div>
                         <div class="tab-content">
-                            @foreach ($categories as $category)
-                                <div class="tab-pane fade active in" id="cat-{{ $category->id }}">
+                            @foreach ($categories as $key => $category)
+                                <div class="tab-pane fade @if ($key == 0) active in @endif" id="cat-{{ $category->id }}">
                                     @foreach ($category->product as $pro)
                                         <div class="col-sm-3">
                                             <div class="product-image-wrapper">
@@ -194,8 +193,8 @@
                                                         <img src="{{ asset($pro->image) }}" alt="" />
                                                         <h2>${{ $pro->price }}</h2>
                                                         <p>{{ $pro->name }}</p>
-                                                        <a href="#" class="btn btn-default add-to-cart"><i
-                                                                class="fa fa-shopping-cart"></i>Add to cart</a>
+                                                        <button type="button" class="btn btn-default add-to-cart js-add-to-cart" data-product-id="{{ $pro->id }}"><i
+                                                                class="fa fa-shopping-cart"></i>Add to cart</button>
                                                     </div>
 
                                                 </div>
@@ -228,7 +227,7 @@
                                                             <img src="{{ asset($pro->image) }}" alt="" />
                                                             <h2>${{ $pro->price }}</h2>
                                                             <p>{{ $pro->name }}</p>
-                                                            <a href="#" class="btn btn-default add-to-cart">
+                                                            <a href="#" class="btn btn-default add-to-cart js-add-to-cart" data-product-id="{{ $pro->id }}">
                                                                 <i class="fa fa-shopping-cart"></i> Add to cart
                                                             </a>
                                                         </div>

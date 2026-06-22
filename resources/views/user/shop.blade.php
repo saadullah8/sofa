@@ -43,12 +43,19 @@
 
                         <div class="price-range"><!--price-range-->
                             <h2>Price Range</h2>
-                            <div class="well text-center">
-                                <input type="text" class="span2" value="" data-slider-min="0"
-                                    data-slider-max="600" data-slider-step="5" data-slider-value="[250,450]"
-                                    id="sl2"><br />
-                                <b class="pull-left">$ 0</b> <b class="pull-right">$ 600</b>
-                            </div>
+                            <form class="well" action="{{ route('shop.index') }}" method="GET">
+                                <input type="hidden" name="subcategory" value="{{ request('subcategory') }}">
+                                <input type="text" name="search" class="form-control" value="{{ request('search') }}" placeholder="Search">
+                                <input type="number" name="min_price" class="form-control" value="{{ request('min_price') }}" placeholder="Min price" style="margin-top: 10px;">
+                                <input type="number" name="max_price" class="form-control" value="{{ request('max_price') }}" placeholder="Max price" style="margin-top: 10px;">
+                                <select name="sort" class="form-control" style="margin-top: 10px;">
+                                    <option value="">Newest</option>
+                                    <option value="price_low" @selected(request('sort') == 'price_low')>Price low to high</option>
+                                    <option value="price_high" @selected(request('sort') == 'price_high')>Price high to low</option>
+                                    <option value="name" @selected(request('sort') == 'name')>Name</option>
+                                </select>
+                                <button class="btn btn-default btn-block" type="submit" style="margin-top: 10px;">Apply</button>
+                            </form>
                         </div><!--/price-range-->
 
                         <div class="shipping text-center"><!--shipping-->
@@ -67,25 +74,24 @@
                                     <div class="single-products">
                                         <div class="productinfo text-center">
                                             <img src="{{ asset($product->image) }}" alt="" />
-                                            <h2>{{ $product->price }}</h2>
+                                            <h2>${{ $product->price }}</h2>
                                             <p>{{ $product->name }}</p>
-                                            <a href="#" class="btn btn-default add-to-cart"><i
-                                                    class="fa fa-shopping-cart"></i>Add to cart</a>
+                                            <button type="button" class="btn btn-default add-to-cart js-add-to-cart" data-product-id="{{ $product->id }}"><i
+                                                    class="fa fa-shopping-cart"></i>Add to cart</button>
                                         </div>
                                         <div class="product-overlay">
                                             <div class="overlay-content">
-                                                <h2>{{ $product->price }}</h2>
+                                                <h2>${{ $product->price }}</h2>
                                                 <p>{{ $product->name }}</p>
                                                 <a href="{{route('productdetails',$product->id)}}" class="btn btn-default add-to-cart"><i
-                                                        class="fa fa-shopping-cart"></i>Add to cart</a>
+                                                        class="fa fa-eye"></i>View details</a>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="choose">
                                         <ul class="nav nav-pills nav-justified">
-                                            <li><a href="#"><i class="fa fa-plus-square"></i>Add to wishlist</a>
-                                            </li>
-                                            <li><a href="#"><i class="fa fa-plus-square"></i>Add to compare</a></li>
+                                            <li><a href="{{route('productdetails',$product->id)}}"><i class="fa fa-plus-square"></i>Details</a></li>
+                                            <li><a href="#" class="js-add-to-cart" data-product-id="{{ $product->id }}"><i class="fa fa-shopping-cart"></i>Add</a></li>
                                         </ul>
                                     </div>
                                 </div>
@@ -96,6 +102,9 @@
                             </div>
                         @endforelse
                     </div><!--features_items-->
+                    <div class="text-center">
+                        {{ $products->links() }}
+                    </div>
                 </div>
             </div>
         </div>

@@ -284,7 +284,7 @@ class Cart
         self::$cart->shipping = 0;
         foreach (self::$cart->items as $item) {
             self::$cart->sub_total += ($item->price * $item->qty);
-            self::$cart->shipping += ($item->shipping * $item->qty);
+            self::$cart->shipping += (($item->shipping ?? 0) * $item->qty);
             self::$cart->qty += $item->qty;
         }
 

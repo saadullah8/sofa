@@ -15,6 +15,15 @@ class HomeController extends Controller
             ->when($selectedSubcategory, function ($query) use ($selectedSubcategory) {
                 $query->where('subcategory_id', $selectedSubcategory);
             })
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $query->where('name', 'like', '%' . $request->search . '%');
+            })
+            ->when($request->filled('min_price'), function ($query) use ($request) {
+                $query->where('price', '>=', (int) $request->min_price);
+            })
+            ->when($request->filled('max_price'), function ($query) use ($request) {
+                $query->where('price', '<=', (int) $request->max_price);
+            })
             ->take(6)
             ->get();
 

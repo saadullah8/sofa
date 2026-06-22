@@ -3,7 +3,7 @@
 @section('content')
     <style>
         #similar-product .carousel-inner .item img {
-            ~width: 80px;
+            width: 80px;
             height: 80px;
             object-fit: cover;
             display: inline-block;
@@ -31,7 +31,7 @@
                                         <div class="panel-body">
                                             <ul>
                                                 @foreach ($category->subCategories as $subcategory)
-                                                    <li><a href="#">{{ $subcategory->name }}</a></li>
+                                                    <li><a href="{{ route('shop.index', ['subcategory' => $subcategory->id]) }}">{{ $subcategory->name }}</a></li>
                                                 @endforeach
                                             </ul>
                                         </div>
@@ -106,23 +106,23 @@
                         </div>
                         <div class="col-sm-7">
                             <div class="product-information"><!--/product-information-->
-                                <img src="images/product-details/new.jpg" class="newarrival" alt="" />
+                                <img src="{{ asset('assets/user/images/product-details/new.jpg') }}" class="newarrival" alt="" />
                                 <h2>{{ $product->name }}</h2>
-                                <p>{{ $product->id }}</p>
-                                <img src="images/product-details/rating.png" alt="" />
+                                <p>Product ID: {{ $product->id }}</p>
+                                <img src="{{ asset('assets/user/images/product-details/rating.png') }}" alt="" />
                                 <span>
-                                    <span>{{ $product->price }}</span>
+                                    <span>${{ $product->price }}</span>
                                     <label>Quantity:</label>
-                                    <input type="text" value="3"  id="add_qty_cart"/>
-                                    <button type="button" class="btn btn-fefault cart" id="add_to_cart"  product_id="{{$product->id}}">
+                                    <input type="number" min="1" max="{{ $product->stock }}" value="1" id="add_qty_cart"/>
+                                    <button type="button" class="btn btn-fefault cart" id="add_to_cart" product_id="{{$product->id}}" @if($product->stock < 1) disabled @endif>
                                         <i class="fa fa-shopping-cart"></i>
                                         Add to cart
                                     </button>
                                 </span>
-                                <p><b>Availability:</b> In Stock</p>
+                                <p><b>Availability:</b> {{ $product->stock > 0 ? 'In Stock' : 'Out of Stock' }}</p>
                                 <p><b>Condition:</b> New</p>
-                                <p><b>Brand:</b> E-SHOPPER</p>
-                                <a href=""><img src="images/product-details/share.png" class="share img-responsive"
+                                <p><b>Category:</b> {{ $product->subcategory->name ?? 'Sofa Shop' }}</p>
+                                <a href="#"><img src="{{ asset('assets/user/images/product-details/share.png') }}" class="share img-responsive"
                                         alt="" /></a>
                             </div><!--/product-information-->
                         </div>
@@ -134,7 +134,7 @@
                                 <li><a href="#details" data-toggle="tab">Details</a></li>
                                 <li><a href="#companyprofile" data-toggle="tab">Company Profile</a></li>
                                 <li><a href="#tag" data-toggle="tab">Tag</a></li>
-                                <li class="active"><a href="#reviews" data-toggle="tab">Reviews (5)</a></li>
+                                <li class="active"><a href="#reviews" data-toggle="tab">Reviews ({{ $product->reviews->count() }})</a></li>
                             </ul>
                         </div>
                         <div class="tab-content">
@@ -303,16 +303,16 @@
 
                             <div class="tab-pane fade active in" id="reviews">
                                 <div class="col-sm-12">
-                                    <ul>
-                                        <li><a href=""><i class="fa fa-user"></i>EUGEN</a></li>
-                                        <li><a href=""><i class="fa fa-clock-o"></i>12:41 PM</a></li>
-                                        <li><a href=""><i class="fa fa-calendar-o"></i>31 DEC 2014</a></li>
-                                    </ul>
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-                                        incididunt ut labore et dolore magna aliqua.Ut enim ad minim veniam, quis nostrud
-                                        exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.Duis aute irure
-                                        dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-                                        pariatur.</p>
+                                    @forelse ($product->reviews as $review)
+                                        <ul>
+                                            <li><a href="#"><i class="fa fa-user"></i>{{ $review->name }}</a></li>
+                                            <li><a href="#"><i class="fa fa-calendar-o"></i>{{ $review->created_at->format('d M Y') }}</a></li>
+                                        </ul>
+                                        <p>{{ $review->review }}</p>
+                                        <hr>
+                                    @empty
+                                        <p>No reviews yet. Be the first to review this product.</p>
+                                    @endforelse
                                     <p><b>Write Your Review</b></p>
 
                                     <form action="{{ route('review.store') }}" method="POST">
@@ -326,7 +326,7 @@
                                                 required="required" />
                                         </span>
                                         <textarea name="review" required="required"></textarea>
-                                        <b>Rating: </b> <img src="images/product-details/rating.png" alt="" />
+                                        <b>Rating: </b> <img src="{{ asset('assets/user/images/product-details/rating.png') }}" alt="" />
                                         <button type="submit" name="submit" class="btn btn-default pull-right">
                                             Submit
                                         </button>
@@ -351,7 +351,7 @@
 
 
                                 @foreach ($chunks as $key => $chunk)
-                                    <div class="item{{ $key == 0 ? 'active' : '' }}">
+                                    <div class="item {{ $key == 0 ? 'active' : '' }}">
                                         @foreach ($chunk as $rel)
                                             <div class="col-sm-4">
                                                 <div class="product-image-wrapper">
@@ -359,9 +359,9 @@
                                                         <div class="productinfo text-center">
                                                             <img src="{{ asset($rel->image) }}"
                                                                 alt="{{ asset($rel->image) }}" />
-                                                            <h2>{{ $rel->price }}</h2>
+                                                            <h2>${{ $rel->price }}</h2>
                                                             <p>{{ $rel->name }}</p>
-                                                            <button type="button" class="btn btn-default add-to-cart"><i
+                                                            <button type="button" class="btn btn-default add-to-cart js-add-to-cart" data-product-id="{{ $rel->id }}"><i
                                                                     class="fa fa-shopping-cart"></i>Add to cart</button>
                                                         </div>
                                                     </div>
@@ -487,8 +487,12 @@
                         console.log(response);
 
                     },
-                    error: function(error) {
-                        console.log(error);
+                    error: function(xhr) {
+                        Swal.fire({
+                            title:"Unable to add",
+                            text: xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : "Please try again.",
+                            icon:"warning",
+                        });
                     }
                 });
             });

@@ -8,6 +8,13 @@
     <h2>Thank you for your order!</h2>
 
     <p>Your order #{{ $order->id }} has been confirmed.</p>
+    <p>
+        <strong>Delivery:</strong>
+        {{ $order->shipping_address }}, {{ $order->shipping_city }}
+        @if ($order->shipping_postal_code)
+            {{ $order->shipping_postal_code }}
+        @endif
+    </p>
 
     <table width="100%" cellpadding="8" cellspacing="0" border="1" style="border-collapse: collapse;">
         <thead>

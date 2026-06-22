@@ -9,13 +9,20 @@ use Illuminate\Http\Request;
 
 class ShopController extends Controller
 {
-public function index(){
-    $products=Product::latest()->get();
-    $data=[
-'products'=>$products,
-'categories'=> Category::all()
-    ];
-    return view('user.shop',$data);
-    
-}
+    public function index(Request $request){
+        $selectedSubcategory = $request->query('subcategory');
+        $products = Product::latest()
+            ->when($selectedSubcategory, function ($query) use ($selectedSubcategory) {
+                $query->where('subcategory_id', $selectedSubcategory);
+            })
+            ->get();
+
+        $data = [
+            'products' => $products,
+            'categories' => Category::with('subCategories')->get(),
+            'selectedSubcategory' => $selectedSubcategory,
+        ];
+
+        return view('user.shop', $data);
+    }
 }

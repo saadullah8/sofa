@@ -79,7 +79,7 @@
                                             <a href="#" class="list-group-item list-group-item-action active">
                                                 <div class="notification-info">
                                                     <div class="notification-list-user-img"><img
-                                                            src="assets/images/avatar-2.jpg" alt=""
+                                                            src="{{asset('assets/images/avatar-2.jpg')}}" alt=""
                                                             class="user-avatar-md rounded-circle"></div>
                                                     <div class="notification-list-user-block"><span
                                                             class="notification-list-user-name">Jeremy
@@ -91,7 +91,7 @@
                                             <a href="#" class="list-group-item list-group-item-action">
                                                 <div class="notification-info">
                                                     <div class="notification-list-user-img"><img
-                                                            src="assets/images/avatar-3.jpg" alt=""
+                                                            src="{{asset('assets/images/avatar-3.jpg')}}" alt=""
                                                             class="user-avatar-md rounded-circle"></div>
                                                     <div class="notification-list-user-block"><span
                                                             class="notification-list-user-name">John Abraham </span>is
@@ -180,7 +180,7 @@
                         <li class="nav-item dropdown nav-user">
                             <a class="nav-link nav-user-img" href="#" id="navbarDropdownMenuLink2"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img
-                                    src="assets/images/avatar-1.jpg" alt="" class="user-avatar-md rounded-circle"></a>
+                                    src="{{asset('assets/images/avatar-1.jpg')}}" alt="" class="user-avatar-md rounded-circle"></a>
                             <div class="dropdown-menu dropdown-menu-right nav-user-dropdown"
                                 aria-labelledby="navbarDropdownMenuLink2">
                                 <div class="nav-user-info">
@@ -411,6 +411,25 @@
         <ul class="nav flex-column">
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('review.index') }}">View All</a>
+            </li>
+        </ul>
+    </div>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link @if ($active=='order') active @endif"
+       href="#"
+       data-toggle="collapse"
+       aria-expanded="false"
+       data-target="#submenu-order"
+       aria-controls="submenu-order">
+       <i class="fa fa-fw fa-shopping-cart"></i> Order
+       <span class="badge badge-success">6</span>
+    </a>
+    <div id="submenu-order" class="collapse">
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('order.index') }}">View All</a>
             </li>
         </ul>
     </div>

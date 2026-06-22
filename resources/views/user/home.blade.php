@@ -91,11 +91,11 @@
                                             </a>
                                         </h4>
                                     </div>
-                                    <div id="{{ $category->id }}" class="panel-collapse collapse">
+                                    <div id="{{ $category->id }}" class="panel-collapse collapse @if ($category->subCategories->contains('id', $selectedSubcategory)) in @endif">
                                         <div class="panel-body">
                                             <ul>
                                                 @foreach ($category->subCategories as $subcategory)
-                                                    <li><a href="#">{{ $subcategory->name }}</a></li>
+                                                    <li><a class="@if ($selectedSubcategory == $subcategory->id) active @endif" href="{{ route('home', ['subcategory' => $subcategory->id]) }}">{{ $subcategory->name }}</a></li>
                                                 @endforeach
                                             </ul>
                                         </div>
@@ -129,7 +129,7 @@
                 <div class="col-sm-9 padding-right">
                     <div class="features_items"><!--features_items-->
                         <h2 class="title text-center">Features Items</h2>
-                        @foreach ($products as $product)
+                        @forelse ($products as $product)
                             <div class="col-sm-4">
                                 <div class="product-image-wrapper">
                                     <div class="single-products">
@@ -158,7 +158,11 @@
                                     </div>
                                 </div>
                             </div>
-                        @endforeach
+                        @empty
+                            <div class="col-sm-12">
+                                <p class="text-center">No products found in this subcategory.</p>
+                            </div>
+                        @endforelse
 
 
 

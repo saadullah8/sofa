@@ -8,6 +8,12 @@
                     <li class="active">Shopping Cart</li>
                 </ol>
             </div>
+            @if (session('success'))
+                <div class="alert alert-success">{{ session('success') }}</div>
+            @endif
+            @if (session('error'))
+                <div class="alert alert-danger">{{ session('error') }}</div>
+            @endif
             <div class="table-responsive cart_info">
                 <table class="table table-condensed">
                     <thead>
@@ -71,7 +77,14 @@
                             <li>Total <span>$ <span id="cart_grandtotal">
                                         {{ App\Helpers\Cart::grandTotal() }}</span></span></li>
                         </ul>
-                        <a class="btn btn-default check_out" href="">Check Out</a>
+                        @if (App\Helpers\Cart::exists())
+                            <form action="{{ route('checkout') }}" method="POST">
+                                @csrf
+                                <button class="btn btn-default check_out" type="submit">Check Out</button>
+                            </form>
+                        @else
+                            <a class="btn btn-default check_out" href="{{ route('shop.index') }}">Continue Shopping</a>
+                        @endif
                     </div>
                 </div>
             </div>

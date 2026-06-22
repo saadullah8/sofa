@@ -32,7 +32,7 @@
                         @endif
 
                         <form role="form"
-                              action="{{ route('stripe.post') }}"
+                              action="{{ route('checkout') }}"
                               method="post"
                               class="require-validation"
                               data-cc-on-file="false"

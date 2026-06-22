@@ -6,11 +6,12 @@ use App\Http\Controllers\admin\ContactController;
 use App\Http\Controllers\admin\DashboardController;
 use App\Http\Controllers\admin\ProductController;
 use App\Http\Controllers\admin\ReviewController;
+use App\Http\Controllers\admin\OrderController;
 use App\Http\Controllers\admin\SizeController;
 use App\Http\Controllers\admin\StuffController;
 use App\Http\Controllers\admin\SubCategoryController;
-;
-use App\Http\Controllers\StripePaymentController;
+
+
 use App\Http\Controllers\user\CartController;
 use App\Http\Controllers\user\CartShowController;
 use App\Http\Controllers\user\HomeController;
@@ -107,6 +108,10 @@ Route::get('admin/review/detail/{id}', [ReviewController::class, 'show'])->name(
 Route::post('admin/review/store', [ReviewController::class, 'store'])->name('review.store');
 Route::get('admin/review/destroy/{id}', [ReviewController::class, 'destroy'])->name('review.destroy');
 
+// order
+Route::get('admin/order/index', [OrderController::class, 'index'])->name('order.index');
+Route::get('admin/order/detail/{id}', [OrderController::class, 'show'])->name('order.show');
+
 // cart
 Route::get('cart/add/{product_id}/{qty}', [CartController::class, 'add'])->name('cart.add');
 Route::get('cart/quantity/increase/{id}', [CartController::class, 'increase'])->name('cart.increase');
@@ -115,10 +120,6 @@ Route::get('cart/product/decrease/{id}', [CartController::class, 'decrease'])->n
 
 Route::get('user/login', [LoginController::class, 'index'])->name('user.login');
 
-Route::controller(StripePaymentController::class)->group(function () {
-    Route::get('stripe', 'stripe');
-    Route::post('stripe', 'stripePost')->name('stripe.post');
-});
 
 Route::get('user/cart', [CartShowController::class, 'index'])->name('user.cart');
 
@@ -136,3 +137,13 @@ Route::get('/send-test-email', function () {
     Mail::to('your_email@example.com')->send(new WelcomeMail('Saad'));
     return 'Email sent successfully';
 });
+
+
+
+use App\Http\Controllers\StripePaymentController;
+
+Route::post('/checkout', [StripePaymentController::class, 'checkout'])->name('checkout');
+Route::get('/payment/success', [StripePaymentController::class, 'success'])->name('payment.success');
+Route::get('/payment/cancel', [StripePaymentController::class, 'cancel'])->name('payment.cancel');
+
+Route::post('/stripe/webhook', [StripePaymentController::class, 'webhook'])->name('stripe.webhook');

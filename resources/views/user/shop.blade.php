@@ -27,7 +27,7 @@
                                         <div class="panel-body">
                                             <ul>
                                                 @foreach ($category->subCategories as $subcategory)
-                                                    <li><a class="@if ($selectedSubcategory == $subcategory->id) active @endif" href="{{ route('shop.index', ['subcategory' => $subcategory->id]) }}">{{ $subcategory->name }}</a></li>
+                                                    <li><a class="js-shop-filter @if ($selectedSubcategory == $subcategory->id) active @endif" href="{{ route('shop.index', ['subcategory' => $subcategory->id]) }}">{{ $subcategory->name }}</a></li>
                                                 @endforeach
                                             </ul>
                                         </div>
@@ -47,7 +47,7 @@
                                 $priceMin = (int) request('min_price', 0);
                                 $priceMax = (int) request('max_price', $maxProductPrice);
                             @endphp
-                            <form class="well" action="{{ route('shop.index') }}" method="GET">
+                            <form class="well" id="shop-filter-form" action="{{ route('shop.index') }}" method="GET">
                                 <input type="hidden" name="subcategory" value="{{ request('subcategory') }}">
                                 <input type="text" name="search" class="form-control" value="{{ request('search') }}" placeholder="Search">
                                 <div class="text-center" style="margin-top: 15px;">
@@ -81,44 +81,8 @@
                 </div>
                 {{-- featuer items --}}
                 <div class="col-sm-9 padding-right">
-                    <div class="features_items"><!--features_items-->
-                        <h2 class="title text-center">Features Items</h2>
-                        @forelse ($products as $product)
-                            <div class="col-sm-4">
-                                <div class="product-image-wrapper">
-                                    <div class="single-products">
-                                        <div class="productinfo text-center">
-                                            <img src="{{ asset($product->image) }}" alt="" />
-                                            <h2>${{ $product->price }}</h2>
-                                            <p>{{ $product->name }}</p>
-                                            <button type="button" class="btn btn-default add-to-cart js-add-to-cart" data-product-id="{{ $product->id }}"><i
-                                                    class="fa fa-shopping-cart"></i>Add to cart</button>
-                                        </div>
-                                        <div class="product-overlay">
-                                            <div class="overlay-content">
-                                                <h2>${{ $product->price }}</h2>
-                                                <p>{{ $product->name }}</p>
-                                                <a href="{{route('productdetails',$product->id)}}" class="btn btn-default add-to-cart"><i
-                                                        class="fa fa-eye"></i>View details</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="choose">
-                                        <ul class="nav nav-pills nav-justified">
-                                            <li><a href="{{route('productdetails',$product->id)}}"><i class="fa fa-plus-square"></i>Details</a></li>
-                                            <li><a href="#" class="js-add-to-cart" data-product-id="{{ $product->id }}"><i class="fa fa-shopping-cart"></i>Add</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        @empty
-                            <div class="col-sm-12">
-                                <p class="text-center">No products found in this subcategory.</p>
-                            </div>
-                        @endforelse
-                    </div><!--features_items-->
-                    <div class="text-center">
-                        {{ $products->links() }}
+                    <div id="shop-products">
+                        @include('user.partials.product-grid')
                     </div>
                 </div>
             </div>
@@ -144,6 +108,52 @@
             $('#sl2').on('slide slideStop', function(event) {
                 syncPriceRange(event.value);
             });
+
+            function loadShop(url, pushState) {
+                $('#shop-products').css('opacity', '0.45');
+
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        $('#shop-products').html(response.html).css('opacity', '1');
+
+                        if (pushState) {
+                            window.history.pushState({}, '', url);
+                        }
+                    },
+                    error: function() {
+                        $('#shop-products').css('opacity', '1');
+                        Swal.fire({
+                            title: 'Filter failed',
+                            text: 'Please try again.',
+                            icon: 'warning'
+                        });
+                    }
+                });
+            }
+
+            $('#shop-filter-form').on('submit', function(e) {
+                e.preventDefault();
+                var query = $(this).serialize();
+                loadShop($(this).attr('action') + '?' + query, true);
+            });
+
+            $('#header-search-form').on('submit', function(e) {
+                e.preventDefault();
+                $('#shop-filter-form input[name="search"]').val($(this).find('input[name="search"]').val());
+                $('#shop-filter-form').trigger('submit');
+            });
+
+            $(document).on('click', '.js-shop-filter, .ajax-pagination a', function(e) {
+                e.preventDefault();
+                loadShop($(this).attr('href'), true);
+            });
+
+            window.onpopstate = function() {
+                loadShop(window.location.href, false);
+            };
         });
     </script>
 @endsection

@@ -133,7 +133,7 @@
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <form class="search_box pull-right" action="{{ route('shop.index') }}" method="GET">
+                        <form class="search_box pull-right" id="header-search-form" action="{{ route('shop.index') }}" method="GET">
                             <input type="text" name="search" value="{{ request('search') }}" placeholder="Search products">
                         </form>
                     </div>

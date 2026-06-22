@@ -41,6 +41,12 @@ class ShopController extends Controller
             'maxProductPrice' => Product::max('price') ?: 1000,
         ];
 
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('user.partials.product-grid', $data)->render(),
+            ]);
+        }
+
         return view('user.shop', $data);
     }
 }

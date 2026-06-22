@@ -31,6 +31,7 @@ class HomeController extends Controller
             'products' => $products,
             'categories' => Category::with('subCategories')->get(),
             'selectedSubcategory' => $selectedSubcategory,
+            'maxProductPrice' => Product::max('price') ?: 1000,
         ];
 
         return view('user.home', $data);

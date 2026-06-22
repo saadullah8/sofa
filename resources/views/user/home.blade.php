@@ -111,12 +111,22 @@
 
                         <div class="price-range"><!--price-range-->
                             <h2>Price Range</h2>
-                            <div class="well text-center">
+                            @php
+                                $priceMin = (int) request('min_price', 0);
+                                $priceMax = (int) request('max_price', $maxProductPrice);
+                            @endphp
+                            <form class="well text-center" action="{{ route('home') }}" method="GET">
+                                <input type="hidden" name="subcategory" value="{{ request('subcategory') }}">
                                 <input type="text" class="span2" value="" data-slider-min="0"
-                                    data-slider-max="600" data-slider-step="5" data-slider-value="[250,450]"
+                                    data-slider-max="{{ $maxProductPrice }}" data-slider-step="5"
+                                    data-slider-value="[{{ $priceMin }},{{ $priceMax }}]"
                                     id="sl2"><br />
-                                <b class="pull-left">$ 0</b> <b class="pull-right">$ 600</b>
-                            </div>
+                                <b class="pull-left">$ <span id="price_min_label">{{ $priceMin }}</span></b>
+                                <b class="pull-right">$ <span id="price_max_label">{{ $priceMax }}</span></b>
+                                <input type="hidden" name="min_price" id="min_price" value="{{ $priceMin }}">
+                                <input type="hidden" name="max_price" id="max_price" value="{{ $priceMax }}">
+                                <button class="btn btn-default btn-block" type="submit" style="margin-top: 25px;">Apply</button>
+                            </form>
                         </div><!--/price-range-->
 
                         <div class="shipping text-center"><!--shipping-->
@@ -268,4 +278,26 @@
         </div>
         </div>
     </section>
+@endsection
+@section('script')
+    <script>
+        $(function() {
+            function syncPriceRange(value) {
+                if (!$.isArray(value)) {
+                    value = String(value).split(',').map(function(item) {
+                        return parseInt(item, 10);
+                    });
+                }
+
+                $('#min_price').val(value[0]);
+                $('#max_price').val(value[1]);
+                $('#price_min_label').text(value[0]);
+                $('#price_max_label').text(value[1]);
+            }
+
+            $('#sl2').on('slide slideStop', function(event) {
+                syncPriceRange(event.value);
+            });
+        });
+    </script>
 @endsection

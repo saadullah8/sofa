@@ -43,11 +43,26 @@
 
                         <div class="price-range"><!--price-range-->
                             <h2>Price Range</h2>
+                            @php
+                                $priceMin = (int) request('min_price', 0);
+                                $priceMax = (int) request('max_price', $maxProductPrice);
+                            @endphp
                             <form class="well" action="{{ route('shop.index') }}" method="GET">
                                 <input type="hidden" name="subcategory" value="{{ request('subcategory') }}">
                                 <input type="text" name="search" class="form-control" value="{{ request('search') }}" placeholder="Search">
-                                <input type="number" name="min_price" class="form-control" value="{{ request('min_price') }}" placeholder="Min price" style="margin-top: 10px;">
-                                <input type="number" name="max_price" class="form-control" value="{{ request('max_price') }}" placeholder="Max price" style="margin-top: 10px;">
+                                <div class="text-center" style="margin-top: 15px;">
+                                    <input type="text" class="span2" value=""
+                                        data-slider-min="0"
+                                        data-slider-max="{{ $maxProductPrice }}"
+                                        data-slider-step="5"
+                                        data-slider-value="[{{ $priceMin }},{{ $priceMax }}]"
+                                        id="sl2">
+                                    <br>
+                                    <b class="pull-left">$ <span id="price_min_label">{{ $priceMin }}</span></b>
+                                    <b class="pull-right">$ <span id="price_max_label">{{ $priceMax }}</span></b>
+                                </div>
+                                <input type="hidden" name="min_price" id="min_price" value="{{ $priceMin }}">
+                                <input type="hidden" name="max_price" id="max_price" value="{{ $priceMax }}">
                                 <select name="sort" class="form-control" style="margin-top: 10px;">
                                     <option value="">Newest</option>
                                     <option value="price_low" @selected(request('sort') == 'price_low')>Price low to high</option>
@@ -109,4 +124,26 @@
             </div>
         </div>
     </section>
+@endsection
+@section('script')
+    <script>
+        $(function() {
+            function syncPriceRange(value) {
+                if (!$.isArray(value)) {
+                    value = String(value).split(',').map(function(item) {
+                        return parseInt(item, 10);
+                    });
+                }
+
+                $('#min_price').val(value[0]);
+                $('#max_price').val(value[1]);
+                $('#price_min_label').text(value[0]);
+                $('#price_max_label').text(value[1]);
+            }
+
+            $('#sl2').on('slide slideStop', function(event) {
+                syncPriceRange(event.value);
+            });
+        });
+    </script>
 @endsection

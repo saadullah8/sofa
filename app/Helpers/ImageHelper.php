@@ -2,7 +2,6 @@
 
 namespace App\Helpers;
 
-use App\Helpers\ImageHelper as HelpersImageHelper;
 use Intervention\Image\Laravel\Facades\Image;
 
 

@@ -134,7 +134,7 @@ Route::get('/preview-email', function () {
 });
 
 Route::get('/send-test-email', function () {
-    Mail::to('your_email@example.com')->send(new WelcomeMail('Saad'));
+    Mail::to(config('mail.mailers.smtp.username'))->send(new WelcomeMail('Saad'));
     return 'Email sent successfully';
 });
 

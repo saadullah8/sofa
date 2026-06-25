@@ -214,7 +214,7 @@ class StripePaymentController extends Controller
 
         $wasPaid = $order->payment_status === 'paid';
         $customerDetails = $session->customer_details ?? null;
-        $customerEmail = $customerDetails->email ?? $order->customer_email;
+        $customerEmail = $order->customer_email ?: ($customerDetails->email ?? null);
         $customerName = $customerDetails->name ?? $order->customer_name;
 
         $order->update([

@@ -8,23 +8,21 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class DemoMail extends Mailable
+class WelcomeMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public array $mailData;
     public string $userName;
 
-    public function __construct(array $mailData)
+    public function __construct(string $userName)
     {
-        $this->mailData = $mailData;
-        $this->userName = $mailData['userName'] ?? 'Saad';
+        $this->userName = $userName;
     }
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: $this->mailData['title'] ?? 'Welcome to chairhub'
+            subject: 'Welcome to chairhub'
         );
     }
 
